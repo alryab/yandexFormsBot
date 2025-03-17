@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить бота для оповещений</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .instruction {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        .form-group input[type="number"]::-webkit-inner-spin-button,
+        .form-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Добавить бота для оповещений</h1>
+    <div class="instruction">
+        <p>Инструкция как создать бота в телеграм:</p>
+        <ol>
+            <li>Откройте Telegram и найдите бота <strong>BotFather</strong>.</li>
+            <li>Начните диалог с BotFather и используйте команду <code>/newbot</code>.</li>
+            <li>Следуйте инструкциям, чтобы задать имя и username вашего бота.</li>
+            <li>После создания бота, обязательно зайдите в него и нажмите <strong>Старт</strong>.</li>
+        </ol>
+        <p>Как узнать свой ID? Используйте бота по этой ссылке: <a href="https://t.me/ID_Extractor_Bot" target="_blank">https://t.me/ID_Extractor_Bot</a>.</p>
+    </div>
+
+    <div class="form-group">
+        <label for="param1">Введите ваш ID (только цифры):</label>
+        <input type="number" id="param1" name="param1" required>
+    </div>
+
+    <div class="form-group">
+        <label for="param2">Введите API токен бота:</label>
+        <input type="text" id="param2" name="param2" required>
+    </div>
+
+    <button class="button" onclick="registerBot()">Зарегистрировать бота</button>
+    <div class="urlForForms"></div>
+
+    <script>
+        function registerBot() {
+            const param1 = document.getElementById('param1').value;
+            const param2 = document.getElementById('param2').value;
+
+            if (!param1 || !param2) {
+                alert('Пожалуйста, заполните оба поля.');
+                return;
+            }
+
+            const url = `/addYandexFormBot/${param1}/${encodeURIComponent(param2)}`;
+            const urlForForms = document.querySelector(".urlForForms");
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Бот успешно зарегистрирован!');
+                    urlForForms.textContent = `Ссылка для API Yandex Forms: https://raadigital.ru/yandexFormsBot/${param1}/${param2}`
+                } else {
+                    alert('Произошла ошибка при регистрации бота.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при отправке запроса.');
+            });
+        }
+    </script>
+</body>
+</html>
