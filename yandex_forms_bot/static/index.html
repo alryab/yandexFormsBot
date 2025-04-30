@@ -1,41 +1,51 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить бота для оповещений</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         h1 {
             color: #333;
         }
+
         .instruction {
             margin-bottom: 20px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
+
         .form-group input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
         }
+
         .form-group input[type="number"] {
             -moz-appearance: textfield;
         }
+
         .form-group input[type="number"]::-webkit-inner-spin-button,
         .form-group input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         .button {
             background-color: #4CAF50;
             color: white;
@@ -43,11 +53,28 @@
             border: none;
             cursor: pointer;
         }
+
         .button:hover {
             background-color: #45a049;
         }
+
+        .urlForForms {
+            margin: 20px;
+        }
+
+        .important {
+            margin-top: 10px;
+            background-color: #d86363;
+            width: max-content;
+            font-weight: 500;
+        }
+
+        .important::marker {
+            font-size: larger;
+        }
     </style>
 </head>
+
 <body>
     <h1>Добавить бота для оповещений</h1>
     <div class="instruction">
@@ -55,10 +82,12 @@
         <ol>
             <li>Откройте Telegram и найдите бота <strong>BotFather</strong>.</li>
             <li>Начните диалог с BotFather и используйте команду <code>/newbot</code>.</li>
-            <li>Следуйте инструкциям, чтобы задать имя и username вашего бота.</li>
-            <li>После создания бота, обязательно зайдите в него и нажмите <strong>Старт</strong>.</li>
+            <li>Следуйте инструкциям, чтобы получить <strong>API токен вашего бота</strong>.</li>
+            <li class="important">После создания бота, обязательно зайдите в него и нажмите <strong>Старт</strong>.</li>
         </ol>
-        <p>Как узнать свой ID? Используйте бота по этой ссылке: <a href="https://t.me/ID_Extractor_Bot" target="_blank">https://t.me/ID_Extractor_Bot</a>.</p>
+        <p>Как узнать свой ID? Используйте бота по этой ссылке: <a href="https://t.me/ID_Extractor_Bot"
+                target="_blank">https://t.me/ID_Extractor_Bot</a>.</p>
+        <p>Как выглядит API токен? Пример: 1234567890:ABCEfJ123_FCxVot555YWnIqcc0takPRIM</p>
     </div>
 
     <div class="form-group">
@@ -75,16 +104,22 @@
     <div class="urlForForms"></div>
 
     <script>
+
         function registerBot() {
             const param1 = document.getElementById('param1').value;
             const param2 = document.getElementById('param2').value;
 
             if (!param1 || !param2) {
-                alert('Пожалуйста, заполните оба поля.');
+                Swal.fire({
+                            title: `Пожалуйста, заполните оба поля.`,
+                            icon: `error`,
+                            html: `Необходимо заполнить оба поля`,
+                        });
                 return;
             }
 
             const url = `/addYandexFormBot/${param1}/${encodeURIComponent(param2)}`;
+            console.log(url)
             const urlForForms = document.querySelector(".urlForForms");
 
             fetch(url, {
@@ -93,19 +128,64 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    alert('Бот успешно зарегистрирован!');
-                    urlForForms.textContent = `Ссылка для API Yandex Forms: https://raadigital.ru/yandexFormsBot/${param1}/${param2}`
-                } else {
-                    alert('Произошла ошибка при регистрации бота.');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Произошла ошибка при отправке запроса.');
-            });
+                .then(async response => {
+                    if (response.ok) {
+                        //alert('Бот успешно зарегистрирован!');
+                        Swal.fire({
+                            title: `Бот успешно зарегистрирован!`,
+                            icon: `success`,
+                            html: `<div class="copyable-link" style="cursor: pointer; margin-top: 10px; padding: 8px; background: #f0f8ff; border-radius: 4px;">
+    Ссылка для API: <span id="copyText">https://raadigital.ru/yandexFormsBot/${param1}/${param2}</span>
+    <small>(нажмите чтобы скопировать)</small>
+  </div> 
+  `,
+                        });
+                        document.getElementById('copyText').addEventListener('click', function () {
+                            const textToCopy = this.textContent.replace('Нажмите чтобы скопировать: ', '');
+
+                            // Создаем временный textarea для копирования
+                            const textarea = document.createElement('textarea');
+                            textarea.value = textToCopy;
+                            textarea.style.position = 'fixed';  // Чтобы не было прокрутки страницы
+                            document.body.appendChild(textarea);
+                            textarea.select();
+
+                            try {
+                                document.execCommand('copy');
+                                // Визуальное подтверждение
+                                const originalText = this.textContent;
+                                this.textContent = 'Скопировано!';
+                                setTimeout(() => {
+                                    this.textContent = originalText;
+                                }, 2000);
+                            } catch (err) {
+                                console.error('Ошибка при копировании:', err);
+                            } finally {
+                                document.body.removeChild(textarea);
+                            }
+                        });
+                        urlForForms.textContent = `Ссылка для API Yandex Forms: https://raadigital.ru/yandexFormsBot/${param1}/${param2}`
+                    } else {
+                        const data = await response.json()
+                        Swal.fire({
+                            title: `Произошла ошибка при регистрации бота`,
+                            icon: `error`,
+                            html: `Текст ошибки:<br><b>${data.message}</b>`,
+                        });
+                    };
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    Swal.fire({
+                            title: `Произошла ошибка при отправке запроса.`,
+                            icon: `error`,
+                            html: `Проверьте все вводимые данные.`,
+                        });
+                });
+
+
         }
     </script>
 </body>
+
 </html>

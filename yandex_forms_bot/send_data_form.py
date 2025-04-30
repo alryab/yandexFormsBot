@@ -20,13 +20,24 @@ class Sendler_Yandex_Data:
                 pass
             return "OK"
         
+        def send_Error(e):
+            self.bot.send_message(self.user_id, f'При попытке отправить форму произошла ошибка\nТекст ошибки:\n<blockquote>{e}</blockquote>\n\nПри повторении этой ошибки можете обратиться за помощью (перешлите это сообщение и ссылку на форму): @alryab')
+
         def send_YandexForm(data):
-            params_dict = json.loads(data)
-            text = self.format_data(params_dict["params"])
-            self.bot.send_message(user_id, text)
+            try:
+                params_dict = json.loads(data)
+                text = self.format_data(params_dict["params"])
+                self.bot.send_message(user_id, text)
+                return 'OK'
+            except Exception as e:
+                send_Error(e)
+                return False
 
         def you_are_ready_for_forms():
-            self.bot.send_message(self.user_id, f'Вы успешно зарегистрировали бота!')
+            try:
+                self.bot.send_message(self.user_id, f'Вы успешно зарегистрировали бота!')
+            except Exception as e:
+                return e
 
         self.webhook = webhook
         self.send_YandexForm = send_YandexForm
@@ -38,15 +49,19 @@ class Sendler_Yandex_Data:
                 if isinstance(value, dict):
                     if key != "":
                         result += " " * indent + f"{key}:\n"
-                    result += self.format_data(value, indent + 2)
+                        result += self.format_data(value, indent + 2)
                 else:
                     # Убираем кавычки внутри значений
                     value = str(value).replace('"', '')
-                    result += " " * indent + f"· {key}: {value}\n"
+                    bullet = "· " if indent > 0 else ""
+                    result += " " * indent + f"{bullet}{key}: {value}\n"
             return result
 
     def set(self):
-        self.bot.delete_webhook()
-        time.sleep(1)
-        self.bot.set_webhook(url=self.WEB_HOOK_URL)
+        try:
+            self.bot.delete_webhook()
+            time.sleep(1)
+            self.bot.set_webhook(url=self.WEB_HOOK_URL)
+        except Exception as e:
+            return False
         return "OK"
